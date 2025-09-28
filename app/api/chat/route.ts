@@ -1,4 +1,4 @@
-import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, UIMessage } from "ai";
 import { killDesktop } from "@/lib/e2b/utils";
 import { bashTool, computerTool } from "@/lib/e2b/tool";
@@ -7,12 +7,18 @@ import { prunedMessages } from "@/lib/utils";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 300;
 
+// Create XAI client with hardcoded API key
+const xai = createOpenAI({
+  baseURL: "https://api.x.ai/v1",
+  apiKey: "xai-AC1DL3HexXQMZ2FY2dTiXtzdlBQ1FREL2JCfnT4N5pg57so0suOgTtYfPU5eZuNTR5ECrlT2nyRMTYcO"
+});
+
 export async function POST(req: Request) {
   const { messages, sandboxId }: { messages: UIMessage[]; sandboxId: string } =
     await req.json();
   try {
     const result = streamText({
-      model: anthropic("claude-3-7-sonnet-20250219"), // Using Sonnet for computer use
+      model: xai("grok-4-fast-non-reasoning"),
       system:
         "You are a helpful assistant with access to a computer. " +
         "Use the computer tool to help the user with their requests. " +
@@ -21,9 +27,6 @@ export async function POST(req: Request) {
         "If the browser opens with a setup wizard, YOU MUST IGNORE IT and move straight to the next step (e.g. input the url in the search bar).",
       messages: prunedMessages(messages),
       tools: { computer: computerTool(sandboxId), bash: bashTool(sandboxId) },
-      providerOptions: {
-        anthropic: { cacheControl: { type: "ephemeral" } },
-      },
     });
 
     // Create response stream

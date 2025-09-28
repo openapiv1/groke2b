@@ -3,6 +3,9 @@
 import { Sandbox } from "@e2b/desktop";
 import { resolution } from "./tool";
 
+// Hardcoded E2B API key as requested
+process.env.E2B_API_KEY = "e2b_8a5c7099485b881be08b594be7b7574440adf09c";
+
 export const getDesktop = async (id?: string) => {
   try {
     if (id) {
