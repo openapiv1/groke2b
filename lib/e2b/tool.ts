@@ -22,7 +22,8 @@ export const computerTool = (sandboxId: string) =>
         "key",
         "scroll",
         "left_click_drag",
-        "wait"
+        "wait",
+        "bash"
       ]).describe("The action to perform"),
       coordinate: z.array(z.number()).length(2).optional().describe("Coordinate [x, y] for click/move actions"),
       text: z.string().optional().describe("Text to type or key to press"),
@@ -30,6 +31,7 @@ export const computerTool = (sandboxId: string) =>
       scroll_amount: z.number().optional().describe("Amount to scroll"),
       scroll_direction: z.enum(["up", "down"]).optional().describe("Direction to scroll"),
       start_coordinate: z.array(z.number()).length(2).optional().describe("Start coordinate [x, y] for drag actions"),
+      command: z.string().optional().describe("The bash command to execute"),
     }),
     execute: async ({
       action,
@@ -39,6 +41,7 @@ export const computerTool = (sandboxId: string) =>
       scroll_amount,
       scroll_direction,
       start_coordinate,
+      command,
     }) => {
       const desktop = await getDesktop(sandboxId);
 
@@ -128,6 +131,29 @@ export const computerTool = (sandboxId: string) =>
             type: "text" as const,
             text: `Dragged mouse from ${startX}, ${startY} to ${endX}, ${endY}`,
           };
+        }
+        case "bash": {
+          if (!command) throw new Error("Command required for bash action");
+          try {
+            const result = await desktop.commands.run(command);
+            return {
+              type: "text" as const,
+              text: result.stdout || "(Command executed successfully with no output)",
+            };
+          } catch (error) {
+            console.error("Bash command failed:", error);
+            if (error instanceof Error) {
+              return {
+                type: "text" as const,
+                text: `Error executing command: ${error.message}`,
+              };
+            } else {
+              return {
+                type: "text" as const,
+                text: `Error executing command: ${String(error)}`,
+              };
+            }
+          }
         }
         default:
           throw new Error(`Unsupported action: ${action}`);
