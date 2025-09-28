@@ -7,10 +7,10 @@ import { prunedMessages } from "@/lib/utils";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 300;
 
-// Create XAI client with hardcoded API key
+// Create XAI client with environment variable
 const xai = createOpenAI({
   baseURL: "https://api.x.ai/v1",
-  apiKey: "xai-AC1DL3HexXQMZ2FY2dTiXtzdlBQ1FREL2JCfnT4N5pg57so0suOgTtYfPU5eZuNTR5ECrlT2nyRMTYcO"
+  apiKey: process.env.XAI_API_KEY
 });
 
 export async function POST(req: Request) {
