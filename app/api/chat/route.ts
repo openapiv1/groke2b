@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, UIMessage } from "ai";
 import { killDesktop } from "@/lib/e2b/utils";
-import { bashTool, computerTool } from "@/lib/e2b/tool";
+import { computerTool } from "@/lib/e2b/tool";
 import { prunedMessages } from "@/lib/utils";
 
 // Allow streaming responses up to 30 seconds
@@ -20,13 +20,14 @@ export async function POST(req: Request) {
     const result = streamText({
       model: xai("grok-4-fast-non-reasoning"),
       system:
-        "You are a helpful assistant with access to a computer. " +
-        "Use the computer tool to help the user with their requests. " +
-        "Use the bash tool to execute commands on the computer. You can create files and folders using the bash tool. Always prefer the bash tool where it is viable for the task. " +
-        "Be sure to advise the user when waiting is necessary. " +
-        "If the browser opens with a setup wizard, YOU MUST IGNORE IT and move straight to the next step (e.g. input the url in the search bar).",
+        "Twoim zadaniem jest sterowanie wirtualnym pulpitem w celu wykonywania określonych działań. " +
+        "ZAWSZE rozpoczynaj swoją interakcję od wykonania zrzutu ekranu (screenshot) — to kluczowe dla oceny aktualnego stanu pulpitu przed podjęciem dalszych akcji. " +
+        "Dostępne akcje: screenshot, wait, left_click, double_click, right_click, mouse_move, type, key, scroll, left_click_drag, bash. " +
+        "Współrzędne w formacie [x, y]. Maksymalny czas oczekiwania to 2 sekundy. " +
+        "Przewijanie z kierunkiem 'up' lub 'down' i określoną ilością. " +
+        "Możesz wykonywać polecenia bash w terminalu Linux.",
       messages: prunedMessages(messages),
-      tools: { computer: computerTool(sandboxId), bash: bashTool(sandboxId) },
+      tools: { computer: computerTool(sandboxId) },
     });
 
     // Create response stream

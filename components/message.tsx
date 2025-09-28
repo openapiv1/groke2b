@@ -19,6 +19,7 @@ import {
   MousePointerClick,
   ScrollText,
   StopCircle,
+  Terminal,
 } from "lucide-react";
 
 const PurePreviewMessage = ({
@@ -87,6 +88,7 @@ const PurePreviewMessage = ({
                       duration,
                       scroll_amount,
                       scroll_direction,
+                      command,
                     } = args;
                     let actionLabel = "";
                     let actionDetail = "";
@@ -147,6 +149,11 @@ const PurePreviewMessage = ({
                             ? `${scroll_direction} by ${scroll_amount}`
                             : "";
                         ActionIcon = ScrollText;
+                        break;
+                      case "bash":
+                        actionLabel = "Executing command";
+                        actionDetail = command ? `"${command}"` : "";
+                        ActionIcon = Terminal;
                         break;
                       default:
                         actionLabel = action;
@@ -210,41 +217,6 @@ const PurePreviewMessage = ({
                         ) : action === "screenshot" ? (
                           <div className="w-full aspect-[1024/768] rounded-sm bg-zinc-200 dark:bg-zinc-800 animate-pulse"></div>
                         ) : null}
-                      </motion.div>
-                    );
-                  }
-                  if (toolName === "bash") {
-                    const { command } = args;
-
-                    return (
-                      <motion.div
-                        initial={{ y: 5, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        key={`message-${message.id}-part-${i}`}
-                        className="flex items-center gap-2 p-2 mb-3 text-sm bg-zinc-50 dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-800"
-                      >
-                        <div className="flex items-center justify-center w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full">
-                          <ScrollText className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-medium flex items-baseline gap-2">
-                            Running command
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-normal">
-                              {command.slice(0, 40)}...
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-5 h-5 flex items-center justify-center">
-                          {state === "call" ? (
-                            isLatestMessage && status !== "ready" ? (
-                              <Loader2 className="animate-spin h-4 w-4 text-zinc-500" />
-                            ) : (
-                              <StopCircle className="h-4 w-4 text-red-500" />
-                            )
-                          ) : state === "result" ? (
-                            <CheckCircle size={14} className="text-green-600" />
-                          ) : null}
-                        </div>
                       </motion.div>
                     );
                   }
